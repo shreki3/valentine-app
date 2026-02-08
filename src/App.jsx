@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-// npm run dev
+
 export default function ValentineApp() {
   const [started, setStarted] = useState(false);
   const [noCount, setNoCount] = useState(0);
@@ -9,17 +9,16 @@ export default function ValentineApp() {
   const yesButtonSize = noCount * 20 + 16;
   const rejectionThreshold = 12;
 
-  
   const phrases = [
-    "არა", "რატო?? :((","გთხოვ პაწუ",
+    "არა", "რატო?? :((", "გთხოვ პაწუ",
     "მეწყინება", "უმამიში წაგიყვან😊", "გთხოვ",
     ":(", "დავიღუპები", "დავიღუპე😒", "ამ საიტის ხათრით მაინც",
-    "ბოლოჯერ გთხოვ!!!!","არა? :(",
+    "ბოლოჯერ გთხოვ!!!!", "არა? :(",
   ];
 
   const lastPhraseIndex = phrases.length - 1;
   const noIsFinal = noCount >= lastPhraseIndex;
-  
+
   const styles = {
     container: {
       display: 'flex',
@@ -27,13 +26,15 @@ export default function ValentineApp() {
       alignItems: 'center',
       justifyContent: 'center',
       height: '100vh',
-      width: '100vw',
+      width: '100%', // Changed from 100vw to 100%
       backgroundColor: '#ffe4ec',
       fontFamily: "'Noto Serif Georgian', serif",
       textAlign: 'center',
-      overflow: 'hidden',
+      overflow: 'hidden', // Keeps the "No" button and hearts contained
       position: 'relative',
       letterSpacing: '3px',
+      margin: 0,
+      padding: 0,
     },
     continueButton: {
       backgroundColor: '#fb7185',
@@ -45,6 +46,7 @@ export default function ValentineApp() {
       cursor: 'pointer',
       boxShadow: '0 4px 15px rgba(251, 113, 133, 0.4)',
       transition: 'transform 0.3s',
+      zIndex: 10,
     },
     yesButton: {
       fontSize: `${yesButtonSize}px`,
@@ -73,26 +75,45 @@ export default function ValentineApp() {
     },
     gif: {
       width: '380px',
+      maxWidth: '90%', // Ensures it doesn't cause overflow on mobile
       borderRadius: '40px',
       marginBottom: '40px',
     }
   };
 
-  // Handler for No button
   const handleNoClick = () => {
     const newCount = noCount + 1;
     setNoCount(newCount);
 
-    const randomTop = Math.floor(Math.random() * 70 + 15);
-    const randomLeft = Math.floor(Math.random() * 70 + 15);
+    // Reduced range slightly to ensure the button doesn't teleport off-screen
+    const randomTop = Math.floor(Math.random() * 60 + 20);
+    const randomLeft = Math.floor(Math.random() * 60 + 20);
     setNoButtonPos({ top: `${randomTop}%`, left: `${randomLeft}%` });
 
     if (newCount >= rejectionThreshold) {
-      setYesPressed(true); // Now No acts as Yes
+      setYesPressed(true);
     }
   };
 
-  // STARTING PAGE
+  // Common Style for Body reset
+  const GlobalStyles = () => (
+    <style>
+      {`
+        body, html {
+          margin: 0;
+          padding: 0;
+          overflow: hidden; /* This kills the main scrollbar */
+          width: 100%;
+          height: 100%;
+        }
+        @keyframes fall {
+          0% { transform: translateY(-10%) rotate(0deg); opacity: 1; }
+          100% { transform: translateY(110vh) rotate(960deg); opacity: 0.2; }
+        }
+      `}
+    </style>
+  );
+
   if (!started) {
     const hearts = Array.from({ length: 100 }).map((_, i) => {
       const left = Math.random() * 100 + '%';
@@ -108,6 +129,7 @@ export default function ValentineApp() {
             left,
             fontSize: size,
             animation: `fall ${duration} linear ${delay} infinite`,
+            pointerEvents: 'none', // Prevents hearts from blocking clicks
           }}
         >
           💙
@@ -117,16 +139,9 @@ export default function ValentineApp() {
 
     return (
       <div style={styles.container}>
+        <GlobalStyles />
         {hearts}
-        <style>
-          {`
-            @keyframes fall {
-              0% { transform: translateY(-10%) rotate(0deg); opacity: 1; }
-              100% { transform: translateY(110vh) rotate(960deg); opacity: 0.2; }
-            }
-          `}
-        </style>
-        <h1 style={{ color: '#bd345bff', fontSize: '3rem', marginBottom: '125px' }}>
+        <h1 style={{ color: '#bd345bff', fontSize: '3rem', marginBottom: '125px', padding: '0 20px' }}>
           სიყვარულით ანას შოთისგან
         </h1>
         <button
@@ -141,54 +156,52 @@ export default function ValentineApp() {
     );
   }
 
-  // SUCCESS PAGE
   if (yesPressed) {
     return (
       <div style={styles.container}>
+        <GlobalStyles />
         <img
           src="https://media.tenor.com/gUiu1zyxfzYAAAAi/bear-kiss-bear-kisses.gif"
           alt="Kissing bears"
           style={styles.gif}
         />
-        <h1 style={{ fontSize: '3rem', color: '#e11d48' }}>🥳🥳🥳🥳მიყვარხარ 💙💙</h1>
+        <h1 style={{ fontSize: '3rem', color: '#e11d48' }}>🥳🥳🥳მიყვარხარ 💙💙💙</h1>
       </div>
     );
   }
 
-  // MAIN QUESTION PAGE
   return (
     <div style={styles.container}>
-    <img
-      src="https://gifdb.com/images/high/cute-love-bear-roses-ou7zho5oosxnpo6k.gif"
-      alt="Asking bear"
-      style={styles.gif}
-    />
-    <h1 style={{ fontSize: '2.5rem', color: '#9f1239', marginBottom: '30px' }}>
-      იქნები ჩემი ვალენტინი? 🌹
-    </h1>
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-      <button
-        style={styles.yesButton}
-        onClick={() => setYesPressed(true)}
-      >
-        კი
-      </button>
-      <button
-        onMouseEnter={handleNoClick}
-        onClick={() => {
-          handleNoClick();
-          if (noIsFinal) {
-            setYesPressed(true);
-          }
-        }}
-        style={{
-          ...styles.noButton,
-          backgroundColor: noIsFinal ? '#10b981' : styles.noButton.backgroundColor, // green if final
-        }}
-      >
-        {noIsFinal ? 'კი!' : phrases[Math.min(noCount, phrases.length - 1)]}
-      </button>
+      <GlobalStyles />
+      <img
+        src="https://gifdb.com/images/high/cute-love-bear-roses-ou7zho5oosxnpo6k.gif"
+        alt="Asking bear"
+        style={styles.gif}
+      />
+      <h1 style={{ fontSize: '2.5rem', color: '#9f1239', marginBottom: '30px' }}>
+        იქნები ჩემი ვალენტინი? 🌹
+      </h1>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+        <button
+          style={styles.yesButton}
+          onClick={() => setYesPressed(true)}
+        >
+          კი
+        </button>
+        <button
+          onMouseEnter={handleNoClick}
+          onClick={() => {
+            handleNoClick();
+            if (noIsFinal) setYesPressed(true);
+          }}
+          style={{
+            ...styles.noButton,
+            backgroundColor: noIsFinal ? '#10b981' : styles.noButton.backgroundColor,
+          }}
+        >
+          {noIsFinal ? 'კი!' : phrases[Math.min(noCount, phrases.length - 1)]}
+        </button>
+      </div>
     </div>
-  </div>
   );
 }
